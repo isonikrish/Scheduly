@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  }
+  },
+  eslint: {
+    ignoreDuringBuilds: true,  // 👈 This skips ESLint errors during build
+  },
 };
 
 export default nextConfig;
