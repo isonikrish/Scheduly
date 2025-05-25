@@ -14,8 +14,18 @@ export async function GET(req: Request) {
         email: session?.user?.email || "",
       },
       include: {
-        hostedAppointments: true,
-        attendingAppointments: true,
+        hostedAppointments: {
+          include: {
+            host: true,
+            attendee: true,
+          }
+        },
+        attendingAppointments: {
+          include: {
+            host: true,
+            attendee: true,
+          }
+        },
         availability: true,
       },
     });

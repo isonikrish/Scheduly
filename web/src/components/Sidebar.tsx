@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import {
-  Calendar,
   Home,
   Plus,
   Timer
@@ -15,7 +14,6 @@ const sidebarItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "Schedule", icon: Plus, url: "/dashboard/schedule" },
   { title: "Availability", icon: Timer, url: "/dashboard/availability" },
-  { title: "Calendar", icon: Calendar, url: "/dashboard/calendar" },
 ]
 
 export default function SidebarComponent() {

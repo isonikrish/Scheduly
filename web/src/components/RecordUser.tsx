@@ -89,7 +89,7 @@ const RecordUser = () => {
   };
   const handleSubmit = async () => {
     setIsLoading(true)
-    scheduleAppointment(transcript);
+    await scheduleAppointment(transcript);
     setIsLoading(false);
   }
   return (
@@ -99,8 +99,8 @@ const RecordUser = () => {
         <button
           onClick={handleVoiceCommand}
           className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${isRecording
-              ? "bg-gradient-to-r from-red-500 to-pink-500 shadow-lg shadow-red-500/25 scale-110"
-              : "bg-gradient-to-r from-blue-500 to-violet-500 hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105"
+            ? "bg-gradient-to-r from-red-500 to-pink-500 shadow-lg shadow-red-500/25 scale-110"
+            : "bg-gradient-to-r from-blue-500 to-violet-500 hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105"
             }`}
         >
           {isRecording ? (
@@ -156,11 +156,24 @@ const RecordUser = () => {
                     size="sm"
                     className="bg-gradient-to-r from-blue-500 to-violet-500 text-white"
                     onClick={handleSubmit}
-                    disabled={!transcript.trim() || isEditing || isLoading}
+                    disabled={isLoading}
                     title="Submit your appointment request"
                   >
-                    <Send className="w-4 h-4 mr-2" />
-                    {isLoading ? "Submitting..." : "Submit"}
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin w-4 h-4 mr-2 text-white" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Submit
+                      </>
+                    )}
+
                   </Button>
                   <Button
                     size="sm"

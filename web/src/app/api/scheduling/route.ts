@@ -28,7 +28,7 @@ async function checkAvailability(attendeeId: number, date: Date) {
       availability: true,
     },
   });
-
+  console.log({date})
   if (!user?.availability) return { isAvailable: false };
 
   const { startTime, endTime, days } = user.availability;

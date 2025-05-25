@@ -6,7 +6,7 @@ export type Availability = {
 export type AppointmentType = {
   id: number;
   agenda: string;
-  date: Date;
+  date: Date | string; // Use string to handle ISO date strings
   hostId: number;
   host: UserType;
   attendeeId: number;
@@ -14,6 +14,7 @@ export type AppointmentType = {
   status: "SCHEDULED" | "CANCELLED" | "COMPLETED" | "CONFIRMED" | "RESCHEDULED";
   createdAt: Date;
   updatedAt: Date;
+  duration: number;
 };
 export type AddAvailabilityType = {
   startTime: string;
