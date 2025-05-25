@@ -7,8 +7,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0F0F] via-[#1A1A1A] to-[#0F0F0F]">
-      <Navbar />
+    <div>
+
         <section className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-24">
           <div className="text-center space-y-8">
@@ -31,7 +31,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/auth">
+              <Link href="/dashboard">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white border-0 px-8 py-6 text-lg"

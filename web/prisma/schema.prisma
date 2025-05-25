@@ -8,10 +8,45 @@ datasource db {
 }
 
 model User {
+  id                    Int            @id @default(autoincrement())
+  name                  String
+  email                 String         @unique
+  image                 String?
+  hostedAppointments    Appointment[]  @relation("HostAppointments")
+  attendingAppointments Appointment[]  @relation("AttendeeAppointments")
+  availabilities        Availability[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+model Appointment {
+  id         Int               @id @default(autoincrement())
+  agenda     String
+  date       DateTime
+  hostId     Int
+  host       User              @relation("HostAppointments", fields: [hostId], references: [id])
+  attendeeId Int
+  attendee   User              @relation("AttendeeAppointments", fields: [attendeeId], references: [id])
+  status     AppointmentStatus @default(SCHEDULED)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+}
+
+model Availability {
   id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  image     String?
+  userId    Int @unique
+  user      User     @relation(fields: [userId], references: [id])
+  startTime Int // ISO 8601 time format (e.g., "09:00")
+  endTime   Int
+  days      Int[] // Array of integers representing days of the week (0-6 for Sunday-Saturday)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMFIRMED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
 }
