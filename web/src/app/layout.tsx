@@ -4,6 +4,7 @@ import "./globals.css";
 import { Provider } from "@/components/Provider";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+import { FetchUser } from "@/components/FetchUser";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <Provider>
+          <FetchUser />
           <div className="py-7">
           <Navbar />
           </div>

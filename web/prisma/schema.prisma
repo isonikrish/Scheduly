@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id                    Int            @id @default(autoincrement())
+  id                    Int           @id @default(autoincrement())
   name                  String
-  email                 String         @unique
+  email                 String        @unique
   image                 String?
-  hostedAppointments    Appointment[]  @relation("HostAppointments")
-  attendingAppointments Appointment[]  @relation("AttendeeAppointments")
-  availabilities        Availability[]
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
+  hostedAppointments    Appointment[] @relation("HostAppointments")
+  attendingAppointments Appointment[] @relation("AttendeeAppointments")
+  availability          Availability?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 }
 
 model Appointment {
   id         Int               @id @default(autoincrement())
   agenda     String
   date       DateTime
+  duration   Int               @default(30)
   hostId     Int
   host       User              @relation("HostAppointments", fields: [hostId], references: [id])
   attendeeId Int
@@ -34,7 +35,7 @@ model Appointment {
 
 model Availability {
   id        Int      @id @default(autoincrement())
-  userId    Int @unique
+  userId    Int      @unique
   user      User     @relation(fields: [userId], references: [id])
   startTime Int // ISO 8601 time format (e.g., "09:00")
   endTime   Int
