@@ -2,6 +2,9 @@ import { GetAIScheduleResponse } from "@/lib/aiSchedulePrompt";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // ---------- Tools ----------
 async function findAttendee(name: string) {
@@ -37,11 +40,15 @@ async function checkAvailability(attendeeId: number, date: Date) {
     return { isAvailable: false };
   }
 
-  const utcDay = date.getUTCDay();
-  const utcHour = date.getUTCHours();
+  // Convert input date (UTC) to IST date
+  // IST is UTC + 5:30
+  const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
 
-  const isAvailableOnDay = days.includes(utcDay);
-  const isWithinTime = utcHour >= startTime && utcHour < endTime;
+  const istDay = istDate.getDay();   // Sunday=0 ... Saturday=6, matches your stored days array
+  const istHour = istDate.getHours(); // Hour in 24h format
+
+  const isAvailableOnDay = days.includes(istDay);
+  const isWithinTime = istHour >= startTime && istHour < endTime;
 
   if (!isAvailableOnDay || !isWithinTime) return { isAvailable: false };
 
@@ -54,45 +61,36 @@ async function checkAvailability(attendeeId: number, date: Date) {
   const isConflict = allAppointments.some((appt) => {
     const start = new Date(appt.date);
     const end = new Date(start.getTime() + (appt.duration ?? 30) * 60000);
-    // Check if 'date' falls within any existing appointment interval
+    // Check if 'date' (UTC) falls within any existing appointment interval (also in UTC)
     return date >= start && date < end;
   });
 
   return { isAvailable: !isConflict };
 }
 
-async function getDate(day: "today" | "tomorrow" | string, timeStr?: string) {
+
+async function getDate(nlp: string) {
   const now = new Date();
+  //nlp is expected to be a natural language string like "tomorrow at 8 am"
+  const prompt = `
+You are a date extraction assistant. 
+Given a natural language input describing a date and time (e.g., "tomorrow at 8 am") and the current date/time in Asia/Kolkata timezone, 
+return ONLY the exact date and time as an ISO 8601 string in UTC format.
 
-  // Start from midnight UTC of the day
-  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+Do NOT return any code, explanations, or additional text.
 
-  if (day === "tomorrow") {
-    date.setUTCDate(date.getUTCDate() + 1);
-  } else if (day !== "today") {
-    // handle other days if needed
-  }
+Current date/time in Asia/Kolkata timezone: ${now.toLocaleString("en-US", {
+    timeZone: "Asia/Kolkata",
+  })}
 
-  if (timeStr) {
-    const timeMatch = timeStr.toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+Input: "${nlp}"
 
-    if (timeMatch) {
-      let hour = parseInt(timeMatch[1], 10);
-      const minute = parseInt(timeMatch[2] || "0", 10);
-      const period = timeMatch[3];
+Output (ISO 8601 UTC date/time string only):`;
+  const result = await model.generateContent(prompt);
+  const response = result.response.text();
+  const cleanDate = response.trim();
 
-      if (period === "pm" && hour < 12) hour += 12;
-      if (period === "am" && hour === 12) hour = 0;
-
-      date.setUTCHours(hour, minute, 0, 0);
-    } else {
-      date.setUTCHours(9, 0, 0, 0);
-    }
-  } else {
-    date.setUTCHours(9, 0, 0, 0);
-  }
-
-  return date;
+  return cleanDate;
 }
 
 async function scheduleAppointment(
@@ -113,14 +111,14 @@ async function scheduleAppointment(
 
 // ---------- Main POST handler ----------
 export async function POST(req: Request) {
-  // const session = await getServerSession();
-  // const user = await prisma.user.findUnique({ where: { email: session?.user?.email ?? "" } });
-  // if (!user) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession();
+  const user = await prisma.user.findUnique({
+    where: { email: session?.user?.email ?? "" },
+  });
+  if (!user) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+  const data = await req.text();
 
-  const user = { id: 1 }; // Hardcoded for testing
-  const userPrompt =
-    "Schedule the appointment with john doe for tomorrow at 10 am for a product related meeting";
-
+  const userPrompt = data.trim();
   const aiPlan = await GetAIScheduleResponse(userPrompt);
   if (!Array.isArray(aiPlan)) {
     return NextResponse.json(
@@ -148,8 +146,8 @@ export async function POST(req: Request) {
         }
 
         case "getDate": {
-          const baseDate = await getDate(step.input.day, step.input.timeStr);
-          context.date = baseDate;
+          const baseDateISO = await getDate(step.input.nlp);
+          context.date = new Date(baseDateISO);
           break;
         }
 

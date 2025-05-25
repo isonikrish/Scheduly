@@ -40,4 +40,5 @@ export type UseAppType = {
     days: number[];
   }) => void;
   fetchUser: () => void;
+  scheduleAppointment: (data: string) => void;
 };

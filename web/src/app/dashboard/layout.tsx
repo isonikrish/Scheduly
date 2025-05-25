@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className='w-64'>
         <Sidebar />
       </div>
-      <main className="p-6">
+      <main className="p-6 w-full">
         {children}
       </main>
       
