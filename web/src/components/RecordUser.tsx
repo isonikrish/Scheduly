@@ -31,7 +31,7 @@ const RecordUser = () => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [waveform, setWaveform] = useState<number[]>(new Array(20).fill(20));
   const [isLoading, setIsLoading] = useState(false);
-  const { scheduleAppointment } = useApp()
+  const { scheduleAppointment, fetchUser } = useApp()
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -90,6 +90,7 @@ const RecordUser = () => {
   const handleSubmit = async () => {
     setIsLoading(true)
     await scheduleAppointment(transcript);
+    await fetchUser();
     setIsLoading(false);
   }
   return (
@@ -195,6 +196,7 @@ const RecordUser = () => {
         <p className="text-sm text-gray-400 mb-3">Try saying:</p>
         <div className="space-y-2">
           {[
+            '"schedule an appointment with a John Doe tomorrow at 3:00 pm the agenda will be for product meeting"',
             '"Schedule a meeting with John tomorrow at 2 PM"',
             '"Book a 30-minute call with the team next Friday"',
             '"Set up a client presentation for next week"',
