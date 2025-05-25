@@ -3,7 +3,7 @@ const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
 export async function GetAIScheduleResponse(userPrompt: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `
+const prompt = `
 You are an appointment scheduling assistant with START, PLAN, ACTION, Observation, and output states.
 Wait for the user prompt and first plan available tools.
 After planning, take action with appropriate tools and wait for observations based on the action.
@@ -13,39 +13,27 @@ Your task is to help users schedule new appointments or reschedule existing appo
 
 You have access to the following tools:
 - findAttendee(name: string): Finds an attendee by name.
+- getDate(day: "today" | "tomorrow" | string, timeStr: string): Returns the exact Date object for the given day and time.
 - checkAvailability(attendeeId: number, date: Date): Checks if an attendee is available on a specific date and time and returns {isAvailable: Boolean}.
 - scheduleAppointment(agenda: string, attendeeId: number, hostId: number, date: Date): Schedules a new appointment with the given agenda, attendee ID, host ID, and date.
-- updateAppoinment(appointmentId: number, date: Date): Updates an existing appointment with a new date.
-- getDate(day: "today" | "tomorrow" | string): Returns the date for today or tomorrow.
-- findExistingAppointment(criteria): Finds an existing appointment by details like attendee, host, agenda, and date to determine if rescheduling is needed.
 
 Example conversation flow:
 
 {"type": "user", "user": "Schedule an appointment with john doe for tomorrow morning at 8 am for a product related meeting"}
-{"type": "plan", "plan": "I will first find the attendee by name, then check their availability for the specified date and time, and finally schedule the appointment if they are available."}
+{"type": "plan", "plan": "I will find the attendee by name, get the exact date and time using getDate, check their availability for that date, and schedule the appointment if available."}
 {"type": "action", "action": "findAttendee", "input": {"name": "john doe"}}
 {"type": "observation", "observation": "Attendee found: John Doe with ID 2"}
+{"type": "action", "action": "getDate", "input": {"day": "tomorrow", "time": "8 am"}}
+{"type": "observation", "observation": "Date resolved: 2025-05-26T08:00:00.000Z"}
 {"type": "action", "action": "checkAvailability", "input": {"attendeeId": 2, "date": "2025-05-26T08:00:00.000Z"}}
 {"type": "observation", "observation": "Attendee is available for the specified date and time."}
 {"type": "action", "action": "scheduleAppointment", "input": {"agenda": "Product related meeting", "attendeeId": 2, "hostId": 1, "date": "2025-05-26T08:00:00.000Z"}}
 {"type": "observation", "observation": "Appointment scheduled successfully with ID 12"}
 
----
-
-{"type": "user", "user": "Reschedule my appointment with john doe to tomorrow at 9 am"}
-{"type": "plan", "plan": "I will find the attendee by name, find the existing appointment, check availability for the new time, and update the appointment if possible."}
-{"type": "action", "action": "findAttendee", "input": {"name": "john doe"}}
-{"type": "observation", "observation": "Attendee found: John Doe with ID 2"}
-{"type": "action", "action": "findExistingAppointment", "input": {"attendeeId": 2, "hostId": 1}}
-{"type": "observation", "observation": "Found existing appointment with ID 12"}
-{"type": "action", "action": "checkAvailability", "input": {"attendeeId": 2, "date": "2025-05-26T09:00:00.000Z"}}
-{"type": "observation", "observation": "Attendee is available for the specified new date and time."}
-{"type": "action", "action": "updateAppoinment", "input": {"appointmentId": 12, "date": "2025-05-26T09:00:00.000Z"}}
-{"type": "observation", "observation": "Appointment updated successfully"}
-
 Now respond to this user prompt:
 "${userPrompt}"
 `;
+
 
 
   const result = await model.generateContent(prompt);
