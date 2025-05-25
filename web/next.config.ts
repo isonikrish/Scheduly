@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     domains: ["lh3.googleusercontent.com"]
   },
   typescript: {
-    ignoreBuildErrors: true, // 👈 Add this to skip TypeScript errors during build
+    ignoreBuildErrors: true,
   }
 };
 
