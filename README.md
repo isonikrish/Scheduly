@@ -23,10 +23,10 @@ Check out the platform live here: [https://scheduly-hbvd.vercel.app/](https://sc
 
 ## Tech Stack
 
-Frontend: Next.js (React framework for server-side rendering and static site generation)
-Database: PostgreSQL with Prisma ORM
-AI API: Gemini API for voice and natural language processing
-Deployment: Vercel
+* **Frontend:** Next.js (React framework for server-side rendering and static site generation)
+* **Database:** PostgreSQL with Prisma ORM
+* **AI API:** Gemini API for voice and natural language processing
+* **Deployment:** Vercel
 
 ---
 
